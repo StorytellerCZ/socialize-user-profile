@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import SimpleSchema from 'simpl-schema';
+import SimpleSchema from 'meteor/aldeed:simple-schema';
 /* eslint-disable import/no-unresolved */
 
 export default ({ Meteor, Mongo, LinkableModel, LinkParent, ServerTime }) => {
@@ -11,8 +11,8 @@ export default ({ Meteor, Mongo, LinkableModel, LinkParent, ServerTime }) => {
     * @param {Object} document An object representing a users profile usually a Mongo document
     */
     class Profile extends LinkParent {
-        user() {
-            return Meteor.users.findOne({ _id: this._id });
+        async user() {
+            return Meteor.users.findOneAsync({ _id: this._id });
         }
         checkOwnership() {
             return this._id === Meteor.userId();
