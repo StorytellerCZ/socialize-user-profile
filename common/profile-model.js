@@ -34,8 +34,6 @@ export default ({ Meteor, Mongo, LinkableModel, LinkParent, ServerTime }) => {
         },
         username: {
             type: String,
-            index: 1,
-            unique: true,
             optional: true,
             custom: SimpleSchema.denyUntrusted,
         },

@@ -6,6 +6,12 @@ import { User } from 'meteor/socialize:user-model';
 import './publications.js';
 import { Profile, ProfilesCollection } from '../common/common.js';
 
+try {
+    ProfilesCollection.createIndexAsync({ username: 1 }, { unique: true, sparse: true })
+} catch (e) {
+    console.debug('Failed to create indexes on Profiles collection.')
+}
+
 ProfilesCollection.allow({
     insert(userId, document) {
         return document.checkOwnership();
