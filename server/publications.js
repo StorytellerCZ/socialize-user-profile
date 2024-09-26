@@ -4,7 +4,6 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { User } from 'meteor/socialize:user-model';
-import { publishComposite } from 'meteor/reywood:publish-composite';
 
 import { ProfilesCollection } from '../common/common.js';
 
@@ -24,49 +23,30 @@ if (Package['socialize:friendships']) {
     RequestsCollection = require('meteor/socialize:requestable').RequestsCollection;
 }
 
+Meteor.publish('socialize.userProfile', async function publishUserProfile(username) {
+  check(username, String);
+  if (!this.userId) return this.ready();
+  const currentUser = User.createEmpty(this.userId);
+  const userCursor = Meteor.users.find({ username }, { fields: User.fieldsToPublish });
+  const userToPublish = await userCursor.fetchAsync()[0];
+  const isSelf = userToPublish.isSelf(currentUser);
 
-publishComposite('socialize.userProfile', function publishUserProfile(username) {
-    check(username, String);
-    if (this.userId) {
-        const currentUser = User.createEmpty(this.userId);
-        const userCursor = Meteor.users.find({ username }, { fields: User.fieldsToPublish });
-        const userToPublish = userCursor.fetch()[0];
-        const isSelf = userToPublish.isSelf(currentUser);
-
-        if (!isSelf && Package['socialize:friendships']) {
-            childrenPublications = childrenPublications.concat([
-                {
-                    find() {
-                        return FriendsCollection.find({
-                            $or: [
-                                { userId: userToPublish._id, friendId: this.userId },
-                                { userId: this.userId, friendId: userToPublish._id },
-                            ],
-                        });
-                    },
-                },
-                {
-                    find() {
-                        return RequestsCollection.find({
-                            $or: [
-                                { linkedObjectId: this.userId, requesterId: userToPublish._id },
-                                { linkedObjectId: userToPublish._id, requesterId: this.userId },
-                            ],
-                        });
-                    },
-                },
-            ]);
-        }
-
-
-        if (isSelf || (!currentUser.blocksUser(userToPublish) && !userToPublish.blocksUser(currentUser))) {
-            return {
-                find() {
-                    return userCursor;
-                },
-                children: childrenPublications,
-            };
-        }
+  if (isSelf || (!currentUser.blocksUser(userToPublish) && !userToPublish.blocksUser(currentUser))) {
+    if (!isSelf && Package['socialize:friendships']) {
+      const friendsCursor = FriendsCollection.find({
+        $or: [
+          { userId: userToPublish._id, friendId: this.userId },
+          { userId: this.userId, friendId: userToPublish._id },
+        ],
+      });
+      const requestsCursor = RequestsCollection.find({
+        $or: [
+          { linkedObjectId: this.userId, requesterId: userToPublish._id },
+          { linkedObjectId: userToPublish._id, requesterId: this.userId },
+        ],
+      });
+      return [userCursor, friendsCursor, requestsCursor];
     }
-    return this.ready();
-});
+    return [userCursor];
+  }
+})
