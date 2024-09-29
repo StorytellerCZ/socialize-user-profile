@@ -16,7 +16,13 @@ ProfilesCollection.allow({
     insert(userId, document) {
         return document.checkOwnership();
     },
+    insertAsync(userId, document) {
+        return document.checkOwnership();
+    },
     update(userId, document) {
+        return document.checkOwnership();
+    },
+    updateAsync(userId, document) {
         return document.checkOwnership();
     },
 });
@@ -41,6 +47,9 @@ Meteor.users.after.remove(function afterRemoveUser(userId) {
 
 Meteor.users.deny({
     update() {
+        return true;
+    },
+    updateAsync() {
         return true;
     },
 });
