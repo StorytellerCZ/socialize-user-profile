@@ -16,13 +16,7 @@ ProfilesCollection.allow({
     insert(userId, document) {
         return document.checkOwnership();
     },
-    insertAsync(userId, document) {
-        return document.checkOwnership();
-    },
     update(userId, document) {
-        return document.checkOwnership();
-    },
-    updateAsync(userId, document) {
         return document.checkOwnership();
     },
 });
