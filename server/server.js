@@ -43,9 +43,6 @@ Meteor.users.deny({
     update() {
         return true;
     },
-    updateAsync() {
-        return true;
-    },
 });
 
 export { Profile, ProfilesCollection };
