@@ -27,7 +27,7 @@ Meteor.publish('socialize.userProfile', async function publishUserProfile(userna
   check(username, String);
   if (!this.userId) return this.ready();
   const currentUser = User.createEmpty(this.userId);
-  const userCursor = Meteor.users.find({ username }, { fields: User.fieldsToPublish });
+  const userCursor = Meteor.users.find({ username }, { fields: User.fieldsToPublish, sort: { createdAt: -1 } });
   const userToPublish = await userCursor.fetchAsync()[0];
   const isSelf = userToPublish.isSelf(currentUser);
 
